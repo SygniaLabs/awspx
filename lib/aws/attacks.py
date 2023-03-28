@@ -1282,8 +1282,11 @@ class Attacks:
             results = db.run(self.queries[pattern])
 
             for r in results:
-                self.console.debug(f"Added: ({r['source']['Arn']})-->"
-                                   f"({r['grant']['Arn']})")
+                try:
+                    self.console.debug(f"Added: ({r['source']['Arn']})-->"
+                                    f"({r['grant']['Arn']})")
+                except Exception as e:
+                    self.console.debug(f"Unexpected error for result: {r} \n error: {e}")
 
             self.stats.append({
                 "pattern": pattern,

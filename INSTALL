@@ -115,10 +115,10 @@ function install(){
         --name awspx \
         --hostname=awspx \
         --env NEO4J_AUTH=neo4j/password \
-        -p 127.0.0.1:80:80 \
-        -p 127.0.0.1:7687:7687 \
-        -p 127.0.0.1:7373:7373 \
-        -p 127.0.0.1:7474:7474 \
+        -p 0.0.0.0:80:80 \
+        -p 0.0.0.0:7687:7687 \
+        -p 0.0.0.0:7373:7373 \
+        -p 0.0.0.0:7474:7474 \
         -v ${MOUNT}/data:/opt/awspx/data:z \
         -e NEO4J_dbms_security_procedures_unrestricted=apoc.jar \
         --restart=always beatro0t/awspx:latest >/dev/null; then
