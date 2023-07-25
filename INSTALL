@@ -136,7 +136,7 @@ function install(){
 
     # Create container
     echo -en "[*] Creating \"awspx\" container... "
-    if [TLS]; then
+    if $TLS ; then
         DOCKER_PARAMS="
         --name awspx \
         --hostname=awspx \
