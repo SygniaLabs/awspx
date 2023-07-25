@@ -37,6 +37,10 @@
               outlined
               required
             ></v-text-field>
+            <v-checkbox 
+              v-model="form.values.tls"
+              label="TLS"
+            ></v-checkbox>
           </v-form>
         </v-card-text>
 
@@ -129,6 +133,7 @@ export default {
           uri: `bolt://${new URL(location.href).host.split(':')[0]}:7687`,
           username: this.neo4j.auth.username,
           password: this.neo4j.auth.password,
+          tls: this.neo4j.auth.tls,
           status: "Disconnected",
         },
         uri_placeholder: `bolt://${new URL(location.href).host.split(':')[0]}:7687`,
@@ -184,7 +189,8 @@ export default {
         .test(
           this.form.values.uri,
           this.form.values.username,
-          this.form.values.password
+          this.form.values.password,
+          this.form.values.tls
         )
         .then((r) => {
           test.uri = true;
@@ -226,12 +232,14 @@ export default {
         uri: this.form.values.uri,
         username: this.form.values.username,
         password: this.form.values.password,
+        tls: this.form.values.tls,
       });
 
       this.neo4j.setup(
         this.form.values.uri,
         this.form.values.username,
-        this.form.values.password
+        this.form.values.password,
+        this.form.values.tls
       );
 
       this.initialize();
@@ -340,6 +348,7 @@ export default {
         this.form.values.uri = auth.uri;
         this.form.values.username = auth.username;
         this.form.values.password = auth.password;
+        this.form.values.tls = auth.tls;
       }
 
       this.mounted = false;
@@ -350,7 +359,8 @@ export default {
             this.neo4j.setup(
               this.form.values.uri,
               this.form.values.username,
-              this.form.values.password
+              this.form.values.password,
+              this.form.values.tls,
             );
             this.initialize();
           }

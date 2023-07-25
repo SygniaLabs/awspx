@@ -339,28 +339,33 @@ export default {
         Vue.prototype.neo4j.setup = (
             uri = auth.uri,
             username = auth.username,
-            password = auth.password
+            password = auth.password,
+            tls = auth.tls
         ) => {
 
             auth.uri = uri;
             auth.username = username;
             auth.password = password;
+            auth.tls = tls;
 
             driver.value = neo4j.driver(
                 uri, neo4j.auth.basic(username, password), {
-                encrypted: false
+                encrypted: tls,
+                trust: "TRUST_ALL_CERTIFICATES"
             })
         }
 
         Vue.prototype.neo4j.test = (
             uri = auth.uri,
             username = auth.username,
-            password = auth.password
+            password = auth.password,
+            tls = auth.tls
         ) => {
             try {
                 const connection = neo4j.driver(
                     uri, neo4j.auth.basic(username, password), {
-                    encrypted: false
+                    encrypted: tls,
+                    trust: "TRUST_ALL_CERTIFICATES"
                 })
                 return this.methods.run("RETURN 1", connection).then(
                 ).catch(e => {

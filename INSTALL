@@ -39,7 +39,32 @@ function host_checks(){
     fi
 }
 
+usage(){
+    echo "Usage: $0 [-s | configure neo4j with TLS] [-b | build docker] [-p | neo4j password]"
+}
+
 function install(){
+    TLS=false;
+    NEO4J_PASS="password"
+    while getopts ":shbp:" opt; do
+        case "$opt" in
+            s) 
+                TLS=true;;
+            b) BUILD=build;;
+            p) NEO4J_PASS="$OPTARG";;
+            h)
+                usage
+                exit 1
+                ;;
+            *)
+                echo "Invalid option: -$OPTARG"
+                usage
+                exit 1
+                ;;
+        esac
+    done
+    # Shift the options so that the positional arguments are left
+    shift $((OPTIND - 1))
     
     BIN_PATH="/usr/local/bin"
 
@@ -91,7 +116,7 @@ function install(){
     echo ""
 
     # Build or pull awspx
-    case $1 in
+    case $BUILD in
         build|BUILD) 
             echo -e "[*] Creating \"awspx\" image...\n"
             docker build $(dirname $0) -t beatro0t/awspx:latest
@@ -111,7 +136,28 @@ function install(){
 
     # Create container
     echo -en "[*] Creating \"awspx\" container... "
-    if docker run -itd \
+    if [TLS]; then
+        DOCKER_PARAMS="
+        --name awspx \
+        --hostname=awspx \
+        --env NEO4J_AUTH=neo4j/$NEO4J_PASS \
+        -p 0.0.0.0:443:443 \
+        -p 0.0.0.0:7687:7687 \
+        -p 0.0.0.0:7473:7473 \
+        -v ${MOUNT}/data:/opt/awspx/data:z \
+        -v /deploy/neo4j/ssl:/ssl \
+        -e NEO4J_dbms_ssl_policy_bolt_enabled=true \
+        -e NEO4J_dbms_ssl_policy_bolt_base__directory=/ssl/bolt \
+        -e NEO4J_dbms_ssl_policy_bolt_client__auth=NONE \
+        -e NEO4J_dbms_connector_bolt_tls__level=REQUIRED \
+        -e NEO4J_dbms_connector_https_enabled=true \
+        -e NEO4J_dbms_ssl_policy_https_enabled=true \
+        -e NEO4J_dbms_ssl_policy_https_base__directory=/ssl/https \
+        -e NEO4J_dbms_security_procedures_unrestricted=apoc.jar \
+        --restart=always beatro0t/awspx:latest
+        "
+    else
+        DOCKER_PARAMS="
         --name awspx \
         --hostname=awspx \
         --env NEO4J_AUTH=neo4j/password \
@@ -121,7 +167,11 @@ function install(){
         -p 0.0.0.0:7474:7474 \
         -v ${MOUNT}/data:/opt/awspx/data:z \
         -e NEO4J_dbms_security_procedures_unrestricted=apoc.jar \
-        --restart=always beatro0t/awspx:latest >/dev/null; then
+        --restart=always beatro0t/awspx:latest
+        "
+    fi
+
+    if docker run -itd $DOCKER_PARAMS >/dev/null; then
         
         cp $(dirname $0)/data/sample.zip -f ${MOUNT}/data/. >/dev/null 2>&1
         
