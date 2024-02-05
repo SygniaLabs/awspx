@@ -13,6 +13,7 @@ RUN apt -y update && apt install -y \
         python3-pip \
         procps \
         git \ 
+        gosu \
     && apt install -y curl \
     && curl -sL https://deb.nodesource.com/setup_18.x | bash \
     && apt -y update && apt install -y nodejs \
